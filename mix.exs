@@ -32,17 +32,23 @@ defmodule BankAPI.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.7"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.10"},
+      {:phoenix, "~> 1.7.11"},
+      {:phoenix_ecto, "~> 4.5"},
+      {:ecto_sql, "~> 3.11"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_dashboard, "~> 0.8.0"},
-      {:swoosh, "~> 1.3"},
-      {:finch, "~> 0.13"},
-      {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"},
-      {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:swoosh, "~> 1.16"},
+      {:finch, "~> 0.18"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.1"},
+      {:jason, "~> 1.4"},
+      {:plug_cowboy, "~> 2.7"},
+
+      # commanded
+      {:commanded, "~> 1.4"},
+      {:eventstore, "~> 1.4", runtime: Mix.env() != :test},
+      {:commanded_eventstore_adapter, "~> 1.4", runtime: Mix.env() != :test},
+      {:commanded_ecto_projections, "~> 1.4"}
     ]
   end
 
@@ -55,8 +61,13 @@ defmodule BankAPI.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "ecto.setup": ["ecto.create --quiet", "ecto.migrate --quiet", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop --quiet", "ecto.setup"],
+      "event_store.reset": [
+        "event_store.drop --quiet",
+        "event_store.create --quiet",
+        "event_store.init --quiet"
+      ],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end

@@ -9,7 +9,8 @@ import Config
 
 config :bank_api,
   namespace: BankAPI,
-  ecto_repos: [BankAPI.Repo]
+  ecto_repos: [BankAPI.Repo],
+  event_stores: [BankAPI.EventStore]
 
 # Configures the endpoint
 config :bank_api, BankAPIWeb.Endpoint,

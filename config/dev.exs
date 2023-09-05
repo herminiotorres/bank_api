@@ -10,6 +10,24 @@ config :bank_api, BankAPI.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+# Configure the event store database
+config :bank_api, BankAPI.EventStore,
+  serializer: EventStore.JsonbSerializer,
+  column_data_type: "jsonb",
+  types: EventStore.PostgresTypes,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "bank_api_eventstore_dev",
+  pool_size: 10
+
+config :bank_api, BankAPI.Accounts.Application,
+  event_store: [
+    adapter: Commanded.EventStore.Adapters.EventStore,
+    serializer: Commanded.Serialization.JsonSerializer,
+    event_store: BankAPI.EventStore
+  ]
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

@@ -12,14 +12,16 @@ defmodule BankAPI.Application do
       BankAPIWeb.Telemetry,
       # Start the Ecto repository
       BankAPI.Repo,
+      # Start the EventStore repository
+      # BankAPI.EventStore,
       # Start the PubSub system
       {Phoenix.PubSub, name: BankAPI.PubSub},
       # Start Finch
       {Finch, name: BankAPI.Finch},
       # Start the Endpoint (http/https)
-      BankAPIWeb.Endpoint
+      BankAPIWeb.Endpoint,
       # Start a worker by calling: BankAPI.Worker.start_link(arg)
-      # {BankAPI.Worker, arg}
+      BankAPI.Accounts.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
