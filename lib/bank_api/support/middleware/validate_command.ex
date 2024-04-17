@@ -11,9 +11,7 @@ defmodule BankApi.Support.Middleware.ValidateCommand do
 
       {:error, changeset} ->
         pipeline
-        |> Pipeline.respond(
-          {:error, :command_validation_failure, command, changeset_error_to_string(changeset)}
-        )
+        |> Pipeline.respond({:error, :command_validation_failure, command, errors_on(changeset)})
         |> Pipeline.halt()
     end
   end
@@ -21,15 +19,11 @@ defmodule BankApi.Support.Middleware.ValidateCommand do
   def after_dispatch(pipeline), do: pipeline
   def after_failure(pipeline), do: pipeline
 
-  defp changeset_error_to_string(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
+  defp errors_on(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+      Regex.replace(~r"%{(\w+)}", message, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)
-    end)
-    |> Enum.reduce("", fn {k, v}, acc ->
-      joined_errors = Enum.join(v, "; ")
-      "#{acc}#{k}: #{joined_errors}\n"
     end)
   end
 end

@@ -37,21 +37,21 @@ defmodule BankApi.Accounts.AccountsTest do
              :error,
              :command_validation_failure,
              _cmd,
-             "initial_balance: is invalid\n"
+             %{initial_balance: ["is invalid"]}
            } = Accounts.open_account(params1)
 
     assert {
              :error,
              :command_validation_failure,
              _cmd,
-             "initial_balance: must be greater than 0\n"
+             %{initial_balance: ["must be greater than 0"]}
            } = Accounts.open_account(params2)
 
     assert {
              :error,
              :command_validation_failure,
              _cmd,
-             "initial_balance: must be greater than 0\n"
+             %{initial_balance: ["must be greater than 0"]}
            } = Accounts.open_account(params3)
   end
 end
