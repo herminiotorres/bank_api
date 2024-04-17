@@ -8,6 +8,7 @@ defmodule BankAPI.Accounts.Commands.DepositIntoAccount do
   embedded_schema do
     field :account_uuid, Ecto.UUID
     field :deposit_amount, :integer
+    field :transfer_uuid, Ecto.UUID
   end
 
   def changeset(%__MODULE__{} = struct, params) do

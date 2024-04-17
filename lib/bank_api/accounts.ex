@@ -6,10 +6,7 @@ defmodule BankAPI.Accounts do
   import Ecto.Query, warn: false
 
   alias BankAPI.Accounts.Application
-  alias BankAPI.Accounts.Commands.CloseAccount
-  alias BankAPI.Accounts.Commands.DepositIntoAccount
-  alias BankAPI.Accounts.Commands.OpenAccount
-  alias BankAPI.Accounts.Commands.WithdrawFromAccount
+  alias BankAPI.Accounts.Commands, as: C
   alias BankAPI.Accounts.Projections.Account
   alias BankAPI.Repo
 
@@ -27,7 +24,7 @@ defmodule BankAPI.Accounts do
     account_uuid = Ecto.UUID.generate()
 
     dispatch_result =
-      %OpenAccount{
+      %C.OpenAccount{
         initial_balance: initial_balance,
         account_uuid: account_uuid
       }
@@ -52,7 +49,7 @@ defmodule BankAPI.Accounts do
 
   def deposit(account_uuid, amount) do
     dispatch_result =
-      %DepositIntoAccount{
+      %C.DepositIntoAccount{
         account_uuid: account_uuid,
         deposit_amount: amount
       }
@@ -72,7 +69,7 @@ defmodule BankAPI.Accounts do
 
   def withdraw(account_uuid, amount) do
     dispatch_result =
-      %WithdrawFromAccount{
+      %C.WithdrawFromAccount{
         account_uuid: account_uuid,
         withdraw_amount: amount
       }
@@ -90,8 +87,18 @@ defmodule BankAPI.Accounts do
     end
   end
 
+  def transfer(source_id, amount, destination_id) do
+    %C.TransferBetweenAccounts{
+      account_uuid: source_id,
+      transfer_uuid: Ecto.UUID.generate(),
+      transfer_amount: amount,
+      destination_account_uuid: destination_id
+    }
+    |> Application.dispatch(consistency: :strong)
+  end
+
   def close_account(account_uuid) do
-    %CloseAccount{
+    %C.CloseAccount{
       account_uuid: account_uuid
     }
     |> Application.dispatch(consistency: :strong)

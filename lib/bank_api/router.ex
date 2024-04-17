@@ -6,6 +6,7 @@ defmodule BankAPI.Router do
   alias BankAPI.Accounts.Commands.CloseAccount
   alias BankAPI.Accounts.Commands.DepositIntoAccount
   alias BankAPI.Accounts.Commands.WithdrawFromAccount
+  alias BankAPI.Accounts.Commands.TransferBetweenAccounts
 
   middleware(BankApi.Support.Middleware.ValidateCommand)
 
@@ -13,4 +14,5 @@ defmodule BankAPI.Router do
   dispatch(CloseAccount, to: Account, identity: :account_uuid)
   dispatch(DepositIntoAccount, to: Account, identity: :account_uuid)
   dispatch(WithdrawFromAccount, to: Account, identity: :account_uuid)
+  dispatch(TransferBetweenAccounts, to: Account, identity: :account_uuid)
 end
