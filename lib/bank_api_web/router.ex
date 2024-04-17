@@ -12,6 +12,7 @@ defmodule BankAPIWeb.Router do
 
     post "/accounts/:id/deposit", AccountController, :deposit
     post "/accounts/:id/withdraw", AccountController, :withdraw
+    post "/accounts/:id/transfer", AccountController, :transfer
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

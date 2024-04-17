@@ -8,6 +8,7 @@ defmodule BankAPI.Accounts.Commands.WithdrawFromAccount do
   embedded_schema do
     field :account_uuid, Ecto.UUID
     field :withdraw_amount, :integer
+    field :transfer_uuid, Ecto.UUID
   end
 
   def changeset(%__MODULE__{} = struct, params) do

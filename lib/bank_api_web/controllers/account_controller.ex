@@ -38,6 +38,17 @@ defmodule BankAPIWeb.AccountController do
     end
   end
 
+  def transfer(conn, %{
+        "id" => account_id,
+        "transfer_amount" => amount,
+        "destination_account" => destination_account_id
+      }) do
+    with :ok <- Accounts.transfer(account_id, amount, destination_account_id) do
+      conn
+      |> send_resp(201, "")
+    end
+  end
+
   def delete(conn, %{"id" => account_id}) do
     with :ok <- Accounts.close_account(account_id) do
       conn

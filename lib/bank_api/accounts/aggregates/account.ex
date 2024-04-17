@@ -1,7 +1,13 @@
 defmodule BankAPI.Accounts.Aggregates.Account do
-  defstruct uuid: nil,
-            current_balance: nil,
-            closed?: false
+  use Ecto.Schema
+
+  @primary_key false
+
+  embedded_schema do
+    field :uuid, Ecto.UUID
+    field :current_balance, :integer
+    field :closed?, :boolean, default: false
+  end
 
   alias __MODULE__
   alias BankAPI.Accounts.Commands, as: C
@@ -114,6 +120,70 @@ defmodule BankAPI.Accounts.Aggregates.Account do
     {:error, :not_found}
   end
 
+  # process manager
+
+  def execute(
+        %Account{
+          uuid: account_uuid,
+          closed?: true
+        },
+        %C.TransferBetweenAccounts{
+          account_uuid: account_uuid
+        }
+      ) do
+    {:error, :account_closed}
+  end
+
+  def execute(
+        %Account{uuid: account_uuid, closed?: false},
+        %C.TransferBetweenAccounts{
+          account_uuid: account_uuid,
+          destination_account_uuid: destination_account_uuid
+        }
+      )
+      when account_uuid == destination_account_uuid do
+    {:error, :transfer_to_same_account}
+  end
+
+  def execute(
+        %Account{
+          uuid: account_uuid,
+          closed?: false,
+          current_balance: current_balance
+        },
+        %C.TransferBetweenAccounts{
+          account_uuid: account_uuid,
+          transfer_amount: transfer_amount
+        }
+      )
+      when current_balance < transfer_amount do
+    {:error, :insufficient_funds}
+  end
+
+  def execute(
+        %Account{uuid: account_uuid, closed?: false},
+        %C.TransferBetweenAccounts{
+          account_uuid: account_uuid,
+          transfer_uuid: transfer_uuid,
+          transfer_amount: transfer_amount,
+          destination_account_uuid: destination_account_uuid
+        }
+      ) do
+    %E.MoneyTransferRequested{
+      transfer_uuid: transfer_uuid,
+      source_account_uuid: account_uuid,
+      amount: transfer_amount,
+      destination_account_uuid: destination_account_uuid
+    }
+  end
+
+  def execute(
+        %Account{},
+        %C.TransferBetweenAccounts{}
+      ) do
+    {:error, :not_found}
+  end
+
   # state mutators
 
   def apply(
@@ -172,5 +242,12 @@ defmodule BankAPI.Accounts.Aggregates.Account do
       account
       | current_balance: new_current_balance
     }
+  end
+
+  def apply(
+        %Account{} = account,
+        %E.MoneyTransferRequested{}
+      ) do
+    account
   end
 end
