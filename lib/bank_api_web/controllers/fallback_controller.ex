@@ -8,17 +8,34 @@ defmodule BankAPIWeb.FallbackController do
     |> render(:"404")
   end
 
-  def call(conn, {:validation_error, _changeset}) do
+  def call(conn, {:error, :account_already_closed}) do
     conn
     |> put_status(:unprocessable_entity)
     |> put_view(json: BankAPIWeb.ErrorJSON)
-    |> render(:"442")
+    |> render(:"422")
+  end
+
+  def call(conn, {:error, :account_closed}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(json: BankAPIWeb.ErrorJSON)
+    |> assign(:message, "Account closed")
+    |> render(:"422")
   end
 
   def call(conn, {:error, :bad_command}) do
     conn
     |> put_status(:unprocessable_entity)
     |> put_view(json: BankAPIWeb.ErrorJSON)
+    |> assign(:message, "Bad command")
+    |> render(:"422")
+  end
+
+  def call(conn, {:error, :insufficient_funds}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(json: BankAPIWeb.ErrorJSON)
+    |> assign(:message, "Insufficient funds to process order")
     |> render(:"422")
   end
 
@@ -26,6 +43,7 @@ defmodule BankAPIWeb.FallbackController do
     conn
     |> put_status(:unprocessable_entity)
     |> put_view(json: BankAPIWeb.ErrorJSON)
+    |> assign(:message, "Command validation error")
     |> render(:"422")
   end
 end

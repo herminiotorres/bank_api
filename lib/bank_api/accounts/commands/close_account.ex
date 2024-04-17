@@ -1,4 +1,4 @@
-defmodule BankAPI.Accounts.Commands.OpenAccount do
+defmodule BankAPI.Accounts.Commands.CloseAccount do
   use Ecto.Schema
 
   import Ecto.Changeset
@@ -7,14 +7,12 @@ defmodule BankAPI.Accounts.Commands.OpenAccount do
 
   embedded_schema do
     field :account_uuid, Ecto.UUID
-    field :initial_balance, :integer
   end
 
   def changeset(%__MODULE__{} = struct, params) do
     struct
     |> cast(params, fields())
     |> validate_required(fields())
-    |> validate_number(:initial_balance, greater_than: 0)
   end
 
   def valid?(command) do
