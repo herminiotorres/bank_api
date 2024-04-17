@@ -5,12 +5,23 @@ defmodule BankAPI.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias BankAPI.Repo
   alias BankAPI.Accounts.Application
+  alias BankAPI.Accounts.Commands.CloseAccount
+  alias BankAPI.Accounts.Commands.DepositIntoAccount
   alias BankAPI.Accounts.Commands.OpenAccount
+  alias BankAPI.Accounts.Commands.WithdrawFromAccount
   alias BankAPI.Accounts.Projections.Account
+  alias BankAPI.Repo
 
-  def get_account(uuid), do: Repo.get!(Account, uuid)
+  def get_account(account_uuid) do
+    case Repo.get(Account, account_uuid) do
+      %Account{} = account ->
+        {:ok, account}
+
+      _reply ->
+        {:error, :not_found}
+    end
+  end
 
   def open_account(%{"initial_balance" => initial_balance}) do
     account_uuid = Ecto.UUID.generate()
@@ -38,4 +49,51 @@ defmodule BankAPI.Accounts do
   end
 
   def open_account(_params), do: {:error, :bad_command}
+
+  def deposit(account_uuid, amount) do
+    dispatch_result =
+      %DepositIntoAccount{
+        account_uuid: account_uuid,
+        deposit_amount: amount
+      }
+      |> Application.dispatch(consistency: :strong)
+
+    case dispatch_result do
+      :ok ->
+        {
+          :ok,
+          Repo.get!(Account, account_uuid)
+        }
+
+      reply ->
+        reply
+    end
+  end
+
+  def withdraw(account_uuid, amount) do
+    dispatch_result =
+      %WithdrawFromAccount{
+        account_uuid: account_uuid,
+        withdraw_amount: amount
+      }
+      |> Application.dispatch(consistency: :strong)
+
+    case dispatch_result do
+      :ok ->
+        {
+          :ok,
+          Repo.get!(Account, account_uuid)
+        }
+
+      reply ->
+        reply
+    end
+  end
+
+  def close_account(account_uuid) do
+    %CloseAccount{
+      account_uuid: account_uuid
+    }
+    |> Application.dispatch(consistency: :strong)
+  end
 end

@@ -15,6 +15,21 @@ defmodule BankAPIWeb.AccountJSON do
     %{data: data(account)}
   end
 
+  def account(%{account: account}) do
+    if account.status == Account.status().closed do
+      %{
+        uuid: account.uuid,
+        current_balance: account.current_balance
+      }
+    else
+      %{
+        uuid: account.uuid,
+        current_balance: account.current_balance,
+        status: account.status
+      }
+    end
+  end
+
   defp data(%Account{} = account) do
     %{
       uuid: account.uuid,
