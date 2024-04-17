@@ -1,5 +1,5 @@
 defmodule BankAPIWeb.AccountControllerTest do
-  use BankAPIWeb.ConnCase
+  use BankAPIWeb.ConnCase, async: true
 
   @create_attrs %{
     initial_balance: 42_00
